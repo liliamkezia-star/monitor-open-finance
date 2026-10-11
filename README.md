@@ -27,9 +27,6 @@ Base normativa, com os trechos citados: [`docs/normas/sla.md`](docs/normas/sla.m
 
 Cada ferramenta entra com um ADR que diz o problema que ela resolve. Em particular: o BigQuery (etapa B) entra para demonstrar uma cloud fora da Microsoft, **não por necessidade de escala** — o volume previsto é de cerca de 1 GB por ano.
 
-## Como este projeto é feito
-
-Todo o código é escrito à mão pela pessoa autora do projeto. Um assistente de IA (Claude Code) atua como mentor técnico: explica, faz perguntas, dá dicas e revisa; as regras desse trabalho estão em [`CLAUDE.md`](CLAUDE.md) e em [`.claude/`](.claude/).
 
 ## Licenças
 
