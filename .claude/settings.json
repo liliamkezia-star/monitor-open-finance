@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.bcb.gov.br)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.github.com)",
+      "WebFetch(domain:openfinancebrasil.org.br)",
+      "WebFetch(domain:*.openfinancebrasil.org.br)",
+      "WebFetch(domain:docs.oracle.com)",
+      "WebFetch(domain:www.oracle.com)",
+      "WebFetch(domain:cloud.google.com)",
+      "WebFetch(domain:docs.cloud.google.com)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "PowerShell(git status)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)"
+    ],
+    "deny": [
+      "Read(//**/.env)",
+      "Read(//**/.env.*)",
+      "Read(//**/*.pem)",
+      "Read(//**/*.key)",
+      "Read(//**/*.p12)",
+      "Read(//**/*.pfx)",
+      "Read(~/.ssh/**)",
+      "Read(~/.oci/**)",
+      "Read(~/.config/gcloud/**)",
+      "Edit(//**/.env)",
+      "Edit(//**/.env.*)",
+      "Edit(//**/*.pem)",
+      "Edit(//**/*.key)",
+      "Edit(//**/*.p12)",
+      "Edit(//**/*.pfx)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.oci/**)",
+      "Edit(~/.config/gcloud/**)"
+    ]
+  }
+}

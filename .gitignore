@@ -1,0 +1,47 @@
+# --- Pessoal (Claude Code) ---
+CLAUDE.local.md
+.claude/settings.local.json
+
+# --- Segredos ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.tfstate
+*.tfstate.*
+credentials*.json
+service-account*.json
+
+# --- Dados locais (medições não vão para o git) ---
+data/
+*.parquet
+*.duckdb
+*.duckdb.wal
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- dbt ---
+target/
+dbt_packages/
+logs/
+
+# --- Sistema e editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
