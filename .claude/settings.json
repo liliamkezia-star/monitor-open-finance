@@ -38,8 +38,7 @@
       "Edit(//**/*.pfx)",
       "Edit(~/.ssh/**)",
       "Edit(~/.oci/**)",
-      "Edit(~/.config/gcloud/**)",
-      "Edit(/scripts/**)"
+      "Edit(~/.config/gcloud/**)"
     ]
   }
 }

@@ -20,7 +20,6 @@ JSON não aceita comentários; o motivo de cada regra fica aqui. Sintaxe conferi
 | `Read(//**/*.pem)`, `*.key`, `*.p12`, `*.pfx` | deny | Chaves privadas e certificados, em qualquer pasta |
 | `Read(~/.ssh/**)`, `~/.oci/**`, `~/.config/gcloud/**` | deny | Chaves SSH (M3), credenciais da Oracle (M3) e do Google Cloud (M9) |
 | `Edit(...)` com os mesmos padrões | deny | Uma `deny` de `Read` já bloqueia `Edit` e `Write` no mesmo caminho; a `deny` de `Edit` cobre também o NotebookEdit e deixa a intenção explícita |
-| `Edit(/scripts/**)` | deny | Código da pessoa desenvolvedora (CLAUDE.md, seção 6). O `/` ancora na pasta onde a sessão começa (a raiz do repositório, se a sessão for aberta nela) e não pega outras pastas `scripts/` mais fundas. Adicionada em 2026-10-18, quando a pasta nasceu (V-02) |
 
 ### Por que `//**/` e não `.env` ou `**/.env`
 
@@ -44,7 +43,7 @@ Fica **sem** regra `allow`, de propósito:
 
 ## Regras futuras
 
-- Quando uma pasta de código nascer (ex.: `src/`, `tests/`, `dbt/`), adicionar `deny` de `Edit` para ela, ancorada com `/`, por exemplo `Edit(/src/**)` (feito para `scripts/` em 2026-10-18). Sem a barra, uma `deny` relativa casa com qualquer pasta de mesmo nome abaixo da pasta atual. Isso faz valer a regra "todo o código é escrito pela pessoa desenvolvedora".
+- ~~Quando uma pasta de código nascer, adicionar `deny` de `Edit` para ela.~~ **Revogado em 2026-10-18** pela pessoa desenvolvedora: quem escreve o código passa a ser decidido por tarefa (CLAUDE.md, seção 6). Se um `deny` de pasta voltar, ancorar com `/` (ex.: `Edit(/src/**)`); sem a barra, uma `deny` relativa casa com qualquer pasta de mesmo nome abaixo da pasta atual.
 
 ## `.claude/settings.local.json` (fora do git)
 
@@ -61,7 +60,6 @@ Rede de segurança para sessões abertas fora da raiz do repositório. Vale em q
 
 | Regra | Tipo | Motivo |
 |---|---|---|
-| `Edit(//<caminho do repositório>/scripts/**)` | deny | Mesmo motivo de `Edit(/scripts/**)` |
 | `Edit(//<caminho do laboratório>/**)` | deny | O laboratório é só leitura (cópia da regra do `settings.local.json`) |
 | Os 18 `deny` de segredos (`Read`/`Edit` de `.env`, chaves, `~/.ssh`, `~/.oci`, `~/.config/gcloud`) | deny | Cópia das regras de `.claude/settings.json`, para valerem também em sessões abertas fora do repositório (2026-10-18). Se uma regra mudar lá, mudar aqui também |
 
