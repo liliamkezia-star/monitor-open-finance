@@ -16,8 +16,8 @@
 - [x] `docs/origem.md`
 - [x] **V-01** — plano definido (2026-10-18): Vinhedo; tentativas manuais perto do M3; plano B depois de 14 dias · execução **adiada para perto do M3** (bloqueio declarado)
 - [x] **V-03** — termos do Portal e do Diretório; limites por origem (2026-10-16; 3 itens `[VALIDAR]` registrados)
-- [ ] V-02 — bloqueio de IP estrangeiro ou de nuvem · desenho com 3 origens (2026-10-18) · origem 1 feita em 2026-10-18 (53/53, com a raiz ICP-Brasil); origem 2 perto do M3
-- [ ] V-04 — carga em lote no BigQuery (pode ficar "bloqueada até a etapa B", com justificativa)
+- [x] **V-02** — bloqueio de IP estrangeiro ou de nuvem · origem 1 feita em 2026-10-18 (53/53, com a raiz ICP-Brasil) · origem 2 **adiada para perto do M3**, depende da VM da V-01 (bloqueio declarado); origem 3 opcional
+- [x] V-04 — carga em lote no BigQuery (2026-10-18: gratuita pelo pool compartilhado; custo só acima de 10 GiB de armazenamento ou 1 TiB de consultas por mês; reconferir antes do M9)
 - [x] V-05 — licença das especificações (2026-10-18: sem licença declarada; YAMLs continuam fora do git)
 - [x] V-06 — classe de frequência dos endpoints (2026-10-16, junto com a V-03: as 6 rotas do MVP são "Baixa")
 - [x] V-07 — Manual de Escopo de Dados 8.0 (2026-10-18: vigente a partir de 3/11/2026; define os dados obrigatórios, não as instituições; 1 `[VALIDAR]`)

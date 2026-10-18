@@ -95,3 +95,4 @@ As perguntas 1 e 2 continuam **sem resposta**: dependem das origens 2 (VM, perto
 - O hash da raiz fica fixado no código. Se não bater, a rodada para antes de medir (mesma regra das especificações em `VERSOES.md`).
 - **Ponto de atenção (Hipótese):** se uma instituição migrar para outra raiz ICP-Brasil (por exemplo, uma v11), a falha volta como `SSLError`. Como testar: o coletor registra o tipo do erro, e um `SSLError` novo pede checar a cadeia com `openssl` antes de concluir que a API está indisponível.
 - Próxima rodada: origem 2, a partir da VM, com o mesmo script e as mesmas raízes.
+- **M0:** a V-02 fecha o M0 com **origem 1 feita e bloqueio declarado** para as demais. A origem 2 depende da VM, que só é criada perto do M3 (V-01). O "pronto" do M0 permite isso ("resultado ou bloqueio declarado").
