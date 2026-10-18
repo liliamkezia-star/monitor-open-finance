@@ -5,7 +5,7 @@
 - **Marco:** M0 — Fundação
 - **Início do projeto:** 2026-10-12 (decisão da fase 07)
 - **Estudo:** 2026-10-12 a 2026-12-13 (rastreador; endereço em `CLAUDE.local.md`)
-- **Última leitura do rastreador:** 2026-10-16 — tópico 1 "estudando" (exercícios 1.1 a 1.4 feitos; faltam os blocos 1.5, repositório e PR, e 1.6, tempo por fase da requisição); tópicos 2 a 13 "não iniciado"; nenhum "dominado".
+- **Última leitura do rastreador:** 2026-10-18 — tópico 1 **dominado** (liberado em 2026-10-17); tópico 2 "estudando"; tópicos 3 a 13 "não iniciado".
 
 ## M0 — checklist do "pronto"
 
@@ -14,13 +14,13 @@
 - [x] `docs/normas/sla.md` com todos os números citados e trechos conferidos (2026-10-10)
 - [x] `docs/especificacoes/VERSOES.md`: commit fixado e hashes das 3 famílias do MVP (2026-10-10)
 - [x] `docs/origem.md`
-- [ ] **V-01** — A1 em São Paulo ou Vinhedo · **prioritária** · passo a passo guiado **antes** de criar a conta
+- [x] **V-01** — plano definido (2026-10-18): Vinhedo; tentativas manuais perto do M3; plano B depois de 14 dias · execução **adiada para perto do M3** (bloqueio declarado)
 - [x] **V-03** — termos do Portal e do Diretório; limites por origem (2026-10-16; 3 itens `[VALIDAR]` registrados)
-- [ ] V-02 — bloqueio de IP estrangeiro (desenho no M0; execução depende da VM e do tópico 1)
+- [ ] V-02 — bloqueio de IP estrangeiro ou de nuvem · desenho com 3 origens (2026-10-18) · origem 1 (local) liberada; origem 2 perto do M3
 - [ ] V-04 — carga em lote no BigQuery (pode ficar "bloqueada até a etapa B", com justificativa)
-- [ ] V-05 — licença das especificações
+- [x] V-05 — licença das especificações (2026-10-18: sem licença declarada; YAMLs continuam fora do git)
 - [x] V-06 — classe de frequência dos endpoints (2026-10-16, junto com a V-03: as 6 rotas do MVP são "Baixa")
-- [ ] V-07 — Manual de Escopo de Dados 8.0
+- [x] V-07 — Manual de Escopo de Dados 8.0 (2026-10-18: vigente a partir de 3/11/2026; define os dados obrigatórios, não as instituições; 1 `[VALIDAR]`)
 - [x] V-08 — termos do GitHub Actions (herdada; reconferir antes do M7)
 - [ ] ADR-001 escrito pela pessoa desenvolvedora (mentoria pela skill `adr`) e aceito
 - [ ] Revisão de todos os arquivos do M0 pela pessoa desenvolvedora
@@ -28,10 +28,10 @@
 
 ## Dependências de estudo por marco
 
-| Marco | Tópicos | Situação em 2026-10-16 |
+| Marco | Tópicos | Situação em 2026-10-18 |
 |---|---|---|
 | M0 | — | liberado |
-| M1 | 1, 2, 3 | bloqueado (1 estudando; 2 e 3 não iniciados) |
+| M1 | 1, 2, 3 | bloqueado (1 dominado; 2 estudando; 3 não iniciado) |
 | M2 | 6 | bloqueado |
 | M3 | 4, 5 | bloqueado |
 | M4 | 7 | bloqueado (e condicionado à V-01) |
@@ -53,13 +53,20 @@ Saídas da V-03 e da V-06, para não se perderem até o M1 (decisão final no AD
 
 ## Bloqueios e riscos ativos
 
-- V-01: a região de origem da Oracle é irreversível; "out of host capacity" pode atrasar dias.
+- V-01: região de origem irreversível (escolha: Vinhedo). "Out of host capacity" pode atrasar o M3 em até 14 dias (gatilho do plano B). VM parada por 7 dias pode ser recuperada pela Oracle; por isso a VM só é criada perto do M3.
+- V-02: bloqueio de IP de **nuvem** (não só estrangeiro) é uma Hipótese nova; se confirmada, afeta o coletor 24/7.
 - Janela de 90 dias: com a coleta 24/7 prevista para meados de novembro, a janela só completa em meados de fevereiro; a v1.0 declara a janela parcial.
 - Fontes oficiais que mudam (termos do Portal, página Referência da wiki): reconferir versão e data antes de publicar resultados.
 
 ## Diário
 
 Entradas curtas, mais recente no topo: data · o que foi feito · o que ficou · próximo passo · tópicos usados.
+
+### 2026-10-18
+- **Feito:** rastreador relido (tópico 1 dominado). V-01, passos 2 e 3: Vinhedo (Opinião), tentativas manuais perto do M3 para evitar a recuperação por ociosidade, plano B depois de 14 dias. V-02 ampliada para 3 origens (residencial, nuvem no Brasil, exterior). V-05 concluída (sem licença declarada). V-07 concluída (IN 759 guardada em `docs/normas/`; vigente a partir de 3/11/2026; define os dados obrigatórios, não as instituições). Rascunhos da mentoria revisados pela pessoa desenvolvedora.
+- **Ficou:** V-02 (script local da origem 1), V-04; ADR-001; revisão dos arquivos do M0; `[VALIDAR]` da V-03 e da V-07 (Resolução Conjunta nº 1/2020); passo 4 da V-01 (criar a conta).
+- **Próximo passo:** script local da V-02 (origem 1), escrito pela pessoa desenvolvedora com o tópico 1.
+- **Tópicos usados:** 1 (desenho do registro e da regra de não retentar na V-02); nenhum código escrito.
 
 ### 2026-10-16
 - **Feito:** V-03 concluída: termos do Portal (omissos sobre coleta automatizada; reprodução proibida, daí a regra "dado com fonte, sem cópia da página"); Diretório (sem termos para a lista pública, sem `robots.txt`; guia recomenda revalidação diária); limite por origem aplicável a Dados Abertos e a divergência de TPM (500 na tabela × 1.000 na norma) registradas. V-06 concluída junto (6 rotas "Baixa", p95 de 4.000 ms). Política para `robots.txt` aceita. Rastreador relido.
