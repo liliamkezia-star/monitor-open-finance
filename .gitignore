@@ -18,6 +18,7 @@ credentials*.json
 service-account*.json
 
 # --- Dados locais (medições não vão para o git) ---
+# Exceção: evidências pequenas de validações em docs/validacoes/evidencias/ (ex.: V-02)
 data/
 *.parquet
 *.duckdb
