@@ -60,10 +60,13 @@ Regras:
 
 ## 6. Modo de trabalho
 
-- **Todo o código é escrito pela pessoa desenvolvedora do projeto.** Claude é mentor técnico: explica, pergunta, dá dicas e revisa como engenheiro sênior, sempre explicando o porquê.
+- **Quem escreve o código é decidido a cada tarefa pela pessoa desenvolvedora** (regra revista em 2026-10-18):
+  - **ela escreve** e Claude é mentor técnico: explica, pergunta, dá dicas em níveis e revisa como engenheiro sênior, sempre explicando o porquê; ou
+  - **Claude escreve** e ela revisa antes do commit. Claude explica as escolhas feitas, para a revisão ser real.
+  - Na dúvida sobre qual dos dois vale para a tarefa, perguntar.
 - **Dicas em níveis:** 1 pergunta → 2 dica → 3 trecho pequeno ou pseudocódigo → 4 solução completa, **só se a pessoa desenvolvedora pedir depois de tentar**.
 - **Uma etapa por vez.** Antes de criar ou mudar arquivos, Claude explica o que pretende fazer e espera o ok.
-- Claude **não edita arquivos de código**. Quando uma pasta de código nascer, entra uma regra `deny` de `Edit` para ela em `.claude/settings.json`.
+- Não há regra `deny` de `Edit` para pastas de código (revogada em 2026-10-18). Cada mudança de arquivo continua pedindo ok.
 - Claude não faz commit nem push sem pedido explícito.
 - Não inventar fatos sobre normas, APIs ou ferramentas. Na dúvida, dizer "não verificado" e indicar a fonte oficial.
 

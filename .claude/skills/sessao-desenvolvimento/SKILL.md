@@ -5,7 +5,7 @@ description: Abre e conduz uma sessão de desenvolvimento do monitor. Use no in�
 
 # Sessão de desenvolvimento
 
-Objetivo: avançar **uma** etapa do marco atual, com o código escrito pela pessoa desenvolvedora e Claude como mentor (CLAUDE.md, seções 6 e 7).
+Objetivo: avançar **uma** etapa do marco atual. A pessoa desenvolvedora decide, por tarefa, se ela escreve o código (Claude como mentor) ou se Claude escreve e ela revisa (CLAUDE.md, seções 6 e 7).
 
 ## 1. Abertura (nesta ordem)
 
@@ -19,6 +19,8 @@ Objetivo: avançar **uma** etapa do marco atual, com o código escrito pela pess
 
 ## 2. Durante a etapa: dicas em níveis
 
+Vale quando a pessoa desenvolvedora escreve o código. Quando Claude escreve, pular para a explicação das escolhas e para a revisão por ela.
+
 - **Nível 1 — pergunta**: uma pergunta que leve ao próximo passo ("o que acontece se a API não responder em 10 s?").
 - **Nível 2 — dica**: o conceito ou a função da biblioteca padrão que resolve, sem código.
 - **Nível 3 — trecho pequeno ou pseudocódigo**: no máximo umas 5 linhas, ilustrando a ideia, não a solução.
@@ -27,7 +29,7 @@ Objetivo: avançar **uma** etapa do marco atual, com o código escrito pela pess
 Regras:
 - Começar sempre no nível 1. Subir um nível por vez, quando pedido ou quando a pessoa travar.
 - Ajustar a explicação aos `pontos_fracos` do tópico em uso (ex.: se "explicar por que a ordem das verificações importa" é ponto fraco, pedir essa explicação em voz alta antes de seguir).
-- Claude não edita arquivos de código. Pode criar ou editar documentação **com ok prévio**.
+- Claude edita código só quando a pessoa desenvolvedora escolher esse modo para a tarefa. Código e documentação, sempre **com ok prévio**.
 - Toda afirmação sobre norma ou API externa: citar a fonte (skill `verificacao-normativa`) ou dizer "não verificado".
 - Se surgir uma decisão técnica relevante, sugerir um ADR (skill `adr`).
 

@@ -1,6 +1,8 @@
 # Permissões do Claude Code neste projeto
 
-JSON não aceita comentários; o motivo de cada regra fica aqui. Sintaxe conferida em https://code.claude.com/docs/en/permissions (lida em 2026-10-10). Ordem de avaliação: **deny → ask → allow**; uma regra `allow` não abre exceção em uma `deny`.
+JSON não aceita comentários; o motivo de cada regra fica aqui. Sintaxe conferida em https://code.claude.com/docs/en/permissions (lida em 2026-10-10; seção de caminhos relida em 2026-10-18). Ordem de avaliação: **deny → ask → allow**; uma regra `allow` não abre exceção em uma `deny`.
+
+**Atenção: as regras de `.claude/` só valem em sessões abertas na raiz do repositório.** O Claude Code carrega `.claude/settings.json` e `.claude/settings.local.json` da pasta onde a sessão começa. Uma sessão aberta em outra pasta não carrega nenhuma regra daqui. Em 2026-10-18 isso aconteceu (sessão aberta numa pasta vazia vizinha). Por isso as regras mais importantes também estão no `~/.claude/settings.json` pessoal (seção no fim).
 
 ## `.claude/settings.json` (versionado)
 
@@ -24,7 +26,7 @@ JSON não aceita comentários; o motivo de cada regra fica aqui. Sintaxe conferi
 Conferido na documentação (seção "Read and Edit", lida em 2026-10-10):
 - Padrões sem barra seguem a sintaxe do gitignore e **casam em qualquer subpasta**: `Read(.env)` e `Read(**/.env)` são equivalentes.
 - Mas padrões relativos ancoram na **pasta em que a sessão começou**: eles bloqueiam o `.env` "at or under the current directory", e não o de uma pasta acima. Uma sessão aberta em `docs/` deixaria o `.env` da raiz desprotegido.
-- `//**/.env` ancora na raiz do sistema de arquivos e casa em qualquer lugar ("any `.env` anywhere on the filesystem"). Não depende de onde a sessão começa e não expõe nenhum caminho pessoal.
+- `//**/.env` ancora na raiz do sistema de arquivos e casa em qualquer lugar ("any `.env` anywhere on the filesystem"). Não depende de em qual pasta do repositório a sessão começa e não expõe nenhum caminho pessoal. (O arquivo de regras em si só é carregado se a sessão começar na raiz; ver a atenção no topo.)
 - No Windows, os caminhos são convertidos para a forma POSIX antes da comparação; `//**/` cobre todos os drives.
 
 ### `.env.example` fica bloqueado
@@ -41,7 +43,7 @@ Fica **sem** regra `allow`, de propósito:
 
 ## Regras futuras
 
-- Quando uma pasta de código nascer (ex.: `src/`, `tests/`, `dbt/`), adicionar `deny` de `Edit` para ela, por exemplo `Edit(src/**)`. Isso faz valer a regra "todo o código é escrito pela pessoa desenvolvedora".
+- ~~Quando uma pasta de código nascer, adicionar `deny` de `Edit` para ela.~~ **Revogado em 2026-10-18** pela pessoa desenvolvedora: quem escreve o código passa a ser decidido por tarefa (CLAUDE.md, seção 6). Se um `deny` de pasta voltar, ancorar com `/` (ex.: `Edit(/src/**)`); sem a barra, uma `deny` relativa casa com qualquer pasta de mesmo nome abaixo da pasta atual.
 
 ## `.claude/settings.local.json` (fora do git)
 
@@ -51,6 +53,15 @@ Fica **sem** regra `allow`, de propósito:
 | `Edit(//<caminho do laboratório>/**)` | deny | O laboratório é só leitura |
 
 No Windows, os caminhos são convertidos para a forma POSIX antes da comparação (`C:\Users\...` vira `/c/Users/...`); o prefixo `//` indica caminho absoluto.
+
+## `~/.claude/settings.json` (pessoal, fora do git)
+
+Rede de segurança para sessões abertas fora da raiz do repositório. Vale em qualquer sessão desta máquina. Caminhos absolutos (`//`), porque um `/path` nas configurações de usuário ancora em `~/.claude/` e não no projeto.
+
+| Regra | Tipo | Motivo |
+|---|---|---|
+| `Edit(//<caminho do laboratório>/**)` | deny | O laboratório é só leitura (cópia da regra do `settings.local.json`) |
+| Os 18 `deny` de segredos (`Read`/`Edit` de `.env`, chaves, `~/.ssh`, `~/.oci`, `~/.config/gcloud`) | deny | Cópia das regras de `.claude/settings.json`, para valerem também em sessões abertas fora do repositório (2026-10-18). Se uma regra mudar lá, mudar aqui também |
 
 ## Limite conhecido
 
