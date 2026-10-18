@@ -7,9 +7,9 @@ Cada pendência `[VALIDAR]` vira um registro aqui: o que foi verificado, como, c
 | ID | Pergunta | Etapa | Prioridade | Status |
 |---|---|---|---|---|
 | [V-01](V-01_oracle-a1-regiao-brasil.md) | Há VM Ampere A1 Always Free disponível em São Paulo ou Vinhedo? | A (M0 → M3) | **Alta — semana de 12/10** | Em andamento (plano definido em 2026-10-18; VM perto do M3) |
-| [V-02](V-02_bloqueio-ip-estrangeiro.md) | As APIs de Dados Abertos bloqueiam IP estrangeiro ou de nuvem? | A | Média | Em andamento |
+| [V-02](V-02_bloqueio-ip-estrangeiro.md) | As APIs de Dados Abertos bloqueiam IP estrangeiro ou de nuvem? | A | Média | Em andamento (origem 1 feita em 2026-10-18; origem 2 perto do M3) |
 | [V-03](V-03_termos-portal-limites.md) | Termos de uso do Portal e do Diretório; limites por origem para Dados Abertos | A (M0 → M1) | **Alta — semana de 12/10** | **Concluída (2026-10-16)** |
-| [V-04](V-04_bigquery-carga-lote.md) | A carga em lote no BigQuery é gratuita? | B (antes do M9) | Baixa | Pendente |
+| [V-04](V-04_bigquery-carga-lote.md) | A carga em lote no BigQuery é gratuita? | B (antes do M9) | Baixa | **Concluída (2026-10-18)**; reconferir antes do M9 |
 | [V-05](V-05_licenca-especificacoes.md) | Qual é a licença do repositório de especificações? | A (antes do M6) | Média | **Concluída (2026-10-18)** |
 | [V-06](V-06_classe-frequencia-endpoints.md) | Qual é a classe de frequência de cada endpoint de Dados Abertos? | A (antes do M5) | Média | **Concluída (2026-10-16)** |
 | [V-07](V-07_manual-escopo-dados.md) | O Manual de Escopo de Dados 8.0 (IN 759) define as APIs de Dados Abertos obrigatórias? | A (antes do M1) | Média | **Concluída (2026-10-18)** |
