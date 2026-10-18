@@ -1,6 +1,6 @@
 # V-02 — Bloqueio de IP estrangeiro ou de nuvem pelas APIs de Dados Abertos
 
-- **Status:** Pendente — desenho ampliado em 2026-10-18 (três origens; revisado pela pessoa desenvolvedora em 2026-10-18)
+- **Status:** Em andamento — origem 1 feita em 2026-10-18 (53/53 com sucesso); origem 2 perto do M3; origem 3 opcional
 - **Prioridade:** Média
 - **Etapa / marco afetado:** A; M1 (coletor), M3 (servidor)
 - **Origem da pendência:** laboratório, `07_projeto_final/2026-10-08_decisao.md`, seção 4; anexo de custo zero, seção 5
@@ -52,15 +52,46 @@ Não fazer: repetir requisições em sequência, varrer endpoints, usar proxies 
 
 ## Execução
 
-- **Data:**
+- **Data:** 2026-10-18. Origem 1 feita; origens 2 e 3 pendentes.
 - **Quem:**
-- **Fonte(s):**
+  - Script `scripts/v02_rodada.py`, escrito pelo Claude e revisado pela pessoa desenvolvedora (modo "Claude escreve, ela revisa", CLAUDE.md seção 6).
+  - As duas rodadas foram executadas pelo Claude, a pedido dela, no computador dela.
+- **Fonte(s):** Diretório (`/participants`, `Last-Modified: Sun, 18 Oct 2026 17:38:44 GMT`, nas duas rodadas). Raiz ICP-Brasil v10: `https://acraiz.icpbrasil.gov.br/credenciadas/RAIZ/ICP-Brasilv10.crt`.
 - **O que foi feito:**
+  - **Rota:** `/personal-loans` (`opendata-loans`). É a família com mais instituições.
+  - **Unidade:** uma requisição por **URL distinta**, e não por instituição. Algumas organizações publicam várias marcas, cada uma com a sua URL (Bradesco/Losango/Next, XP/Rico/Clear/Modal, Carrefour/Atacadão/Sam's Club). Com isso, 53 URLs de 42 organizações. Só entram organizações e recursos `Active`.
+  - **Formato e registro:** JSON Lines, uma linha por requisição. O nome do arquivo é a hora de início em UTC + a origem. Os registros ficam no git, em `docs/validacoes/evidencias/V-02/`, para auditoria. Sem retentativa; pausa de 1 s entre requisições; timeout de 15 s; User-Agent identifica o projeto.
+
+| Rodada | Arquivo | Início – fim (UTC) | Raízes confiáveis | Sucesso | Falha de conexão | SHA-256 |
+|---|---|---|---|---|---|---|
+| 1 | `2026-10-18T1740Z_origem1.jsonl` | 17:40:52 – 17:42:36 | só `certifi` (lista da Mozilla) | 43 | 10 | `e243478481a5f3d39bdb0b48cb4e51ab1f553c34fd776605c6f4b97e954efe39` |
+| 2 | `2026-10-18T1745Z_origem1.jsonl` | 17:45:52 – 17:47:26 | `certifi` + raiz ICP-Brasil v10 | 53 | 0 | `470ad33e0aaea1716a6eb273844aa124a4853a0f1df0d3317fb8091c3b7be742` |
+
+Nenhuma resposta 4xx, 5xx, timeout ou corpo inválido nas duas rodadas.
 
 ## Resultado
 
-—
+**Origem 1 (residencial, Brasil): todas as 53 URLs responderam HTTP 2xx com JSON válido** (rodada 2). Esta é a referência para comparar com a origem 2.
+
+**As 10 falhas da rodada 1 não eram bloqueio.**
+- **Fato:** todas foram `SSLError` com `CERTIFICATE_VERIFY_FAILED`:
+  - Bradesco ×4 (Bradesco, Bradesco Financiamentos, Losango, Next);
+  - Inter;
+  - Caixa;
+  - QI Tech;
+  - PagSeguro;
+  - Sicoob;
+  - InfinitePay.
+- **Fato (`openssl`, 2026-10-18):** as 10 cadeias de certificado terminam na **Autoridade Certificadora Raiz Brasileira v10 (ICP-Brasil)**. Na maioria, a intermediária é a AC SOLUTI SSL EV G4. A lista de raízes da Mozilla, usada pelo `certifi`, não inclui essa raiz.
+- **Fato:** o SHA-256 da raiz baixada do ITI (certificado em DER) é igual ao da raiz enviada por `api.bradesco.com`: `6e0bff069a26994c15de2c4888cc54af84882e5495b7fbf66be9ccffec7489f6`. A raiz vale até 2032-07-01.
+- **Evidência:** com essa raiz acrescentada (rodada 2), as mesmas 10 URLs responderam com sucesso, cinco minutos depois.
+- **Inferência:** a falha de "certificado SSL inválido" de 2026-10-08, no laboratório, provavelmente tinha a mesma causa. Não dá para confirmar, porque as respostas não foram guardadas.
+
+As perguntas 1 e 2 continuam **sem resposta**: dependem das origens 2 (VM, perto do M3) e 3 (opcional).
 
 ## Efeito no projeto
 
-—
+- **O coletor (M1) precisa confiar na raiz ICP-Brasil v10, além do `certifi`.** Sem isso, cerca de 1 em cada 5 URLs (10 de 53) apareceria como "indisponível" por um problema do nosso lado. O monitor erraria justamente nos maiores bancos. Desligar a verificação (`verify=False`) não é opção.
+- O hash da raiz fica fixado no código. Se não bater, a rodada para antes de medir (mesma regra das especificações em `VERSOES.md`).
+- **Ponto de atenção (Hipótese):** se uma instituição migrar para outra raiz ICP-Brasil (por exemplo, uma v11), a falha volta como `SSLError`. Como testar: o coletor registra o tipo do erro, e um `SSLError` novo pede checar a cadeia com `openssl` antes de concluir que a API está indisponível.
+- Próxima rodada: origem 2, a partir da VM, com o mesmo script e as mesmas raízes.

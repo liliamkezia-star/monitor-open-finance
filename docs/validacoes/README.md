@@ -7,7 +7,7 @@ Cada pendência `[VALIDAR]` vira um registro aqui: o que foi verificado, como, c
 | ID | Pergunta | Etapa | Prioridade | Status |
 |---|---|---|---|---|
 | [V-01](V-01_oracle-a1-regiao-brasil.md) | Há VM Ampere A1 Always Free disponível em São Paulo ou Vinhedo? | A (M0 → M3) | **Alta — semana de 12/10** | Em andamento (plano definido em 2026-10-18; VM perto do M3) |
-| [V-02](V-02_bloqueio-ip-estrangeiro.md) | As APIs de Dados Abertos bloqueiam IP estrangeiro ou de nuvem? | A | Média | Pendente |
+| [V-02](V-02_bloqueio-ip-estrangeiro.md) | As APIs de Dados Abertos bloqueiam IP estrangeiro ou de nuvem? | A | Média | Em andamento |
 | [V-03](V-03_termos-portal-limites.md) | Termos de uso do Portal e do Diretório; limites por origem para Dados Abertos | A (M0 → M1) | **Alta — semana de 12/10** | **Concluída (2026-10-16)** |
 | [V-04](V-04_bigquery-carga-lote.md) | A carga em lote no BigQuery é gratuita? | B (antes do M9) | Baixa | Pendente |
 | [V-05](V-05_licenca-especificacoes.md) | Qual é a licença do repositório de especificações? | A (antes do M6) | Média | **Concluída (2026-10-18)** |
