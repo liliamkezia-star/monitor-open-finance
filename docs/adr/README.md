@@ -6,7 +6,7 @@ Toda decisão técnica relevante fica registrada aqui, com a fonte que a sustent
 
 | ADR | Título | Status | Data |
 |---|---|---|---|
-| [ADR-001](ADR-001-medir-do-brasil-caminho-a-b.md) | Medir do Brasil e caminho A → B | Em redação | — |
+| [ADR-001](ADR-001-medir-do-brasil-caminho-a-b.md) | Medir do Brasil e caminho A → B | Aceito | 2026-10-29 |
 
 ADRs já previstos (ainda não abertos):
 - M1: frequência de coleta (valor inicial: 1 requisição a cada 15 minutos por endpoint; depende da V-03).
