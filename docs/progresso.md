@@ -22,7 +22,7 @@
 - [x] V-06 — classe de frequência dos endpoints (2026-10-16, junto com a V-03: as 6 rotas do MVP são "Baixa")
 - [x] V-07 — Manual de Escopo de Dados 8.0 (2026-10-18: vigente a partir de 3/11/2026; define os dados obrigatórios, não as instituições; 1 `[VALIDAR]`)
 - [x] V-08 — termos do GitHub Actions (herdada; reconferir antes do M7)
-- [ ] ADR-001 escrito pela pessoa desenvolvedora (mentoria pela skill `adr`) e aceito
+- [x] ADR-001 escrito pela pessoa desenvolvedora (mentoria pela skill `adr`) e aceito
 - [ ] Revisão de todos os arquivos do M0 pela pessoa desenvolvedora
 - [x] `git init` e primeiro commit, sem segredos, feitos pela pessoa desenvolvedora (`52976fa`, 2026-10-10)
 
@@ -62,7 +62,14 @@ Saídas da V-03 e da V-06, para não se perderem até o M1 (decisão final no AD
 
 Entradas curtas, mais recente no topo: data · o que foi feito · o que ficou · próximo passo · tópicos usados.
 
+### 2026-10-29
+- **Feito:** ADR-001 aceito (PR #6): medir do Brasil, com a origem registrada em cada medição; caminho A → B pelo Parquet diário; GitHub Actions nunca coleta. Pendências da V-01 e da V-02 (origem 2) viraram gatilhos de revisão. Conferência do "pronto" do M0. `.gitattributes` com `*.jsonl text eol=lf`: com `core.autocrlf=true`, a cópia local das evidências da V-02 ganhava CRLF e o SHA-256 deixava de bater com o registrado (o conteúdo no git estava certo).
+- **Ficou:** revisão de todos os arquivos do M0 pela pessoa desenvolvedora; reler o rastreador antes de declarar o M1; `[VALIDAR]` da V-03, da V-07, da V-04 (M9) e do `VERSOES.md` (M6).
+- **Próximo passo:** revisão final do M0; depois, marco M1 e status do README.
+- **Tópicos usados:** nenhum (só documentação).
+
 ### 2026-10-18
+- **Correção (2026-10-29):** o script local da V-02 e a V-04 foram feitos no mesmo dia, à tarde (PRs #4 e #5). O script foi escrito pelo Claude e revisado pela pessoa desenvolvedora (V-02, "Execução").
 - **Feito:** rastreador relido (tópico 1 dominado). V-01, passos 2 e 3: Vinhedo (Opinião), tentativas manuais perto do M3 para evitar a recuperação por ociosidade, plano B depois de 14 dias. V-02 ampliada para 3 origens (residencial, nuvem no Brasil, exterior). V-05 concluída (sem licença declarada). V-07 concluída (IN 759 guardada em `docs/normas/`; vigente a partir de 3/11/2026; define os dados obrigatórios, não as instituições). Rascunhos da mentoria revisados pela pessoa desenvolvedora.
 - **Ficou:** V-02 (script local da origem 1), V-04; ADR-001; revisão dos arquivos do M0; `[VALIDAR]` da V-03 e da V-07 (Resolução Conjunta nº 1/2020); passo 4 da V-01 (criar a conta).
 - **Próximo passo:** script local da V-02 (origem 1), escrito pela pessoa desenvolvedora com o tópico 1.

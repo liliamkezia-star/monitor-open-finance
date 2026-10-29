@@ -77,3 +77,7 @@ Sem essa decisão, o M1 não sabe que origem registrar em cada medição, o M3 n
 | Sandbox do BigQuery: 60 dias × janela de 90 | `docs/origem.md`, seção 4 (decisão do laboratório) | 2026-10-08 (laboratório) | Fato |
 | BigQuery pelo gap G5, não pela escala; G5 só fecha na etapa B | CLAUDE.md, seção 9; `docs/origem.md`, seção 4 | 2026-10-08 (laboratório) | Evidência / Inferência |
 | Raiz ICP-Brasil v10 necessária no coletor | V-02, "Efeito no projeto" | 2026-10-18 | Fato / Evidência |
+
+## Errata
+
+- **2026-10-29:** no Contexto e na tabela de alternativas, onde se lê "IN 615, 5.3", leia-se "IN 615, 5.3.2, V (informações adicionais)". O item 5.3 trata da medição no provedor; a medição do consumidor, que inclui a rede, está no 5.3.2, V (`docs/normas/sla.md`, seção 2). A decisão não muda.

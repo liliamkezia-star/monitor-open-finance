@@ -1,0 +1,2 @@
+# Evidências com hash SHA-256 registrado: fim de linha LF em qualquer sistema
+*.jsonl text eol=lf
