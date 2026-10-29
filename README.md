@@ -1,6 +1,6 @@
 # Monitor externo do Manual de APIs do Open Finance Brasil
 
-> **Status: em construção (M0 — Fundação).** Ainda não há coleta nem resultados publicados.
+> **Status: em construção (M1 — Coletor local).** Ainda não há coleta nem resultados publicados.
 
 Monitor que mede, de fora e a partir do Brasil, as APIs públicas de **Dados Abertos** do Open Finance Brasil — disponibilidade, tempo de resposta (p95) e conformidade com as especificações oficiais — e compara as medições com os limites do Manual de APIs do Open Finance (IN BCB 615/2025, versão 7.0).
 

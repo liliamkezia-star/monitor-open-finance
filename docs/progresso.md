@@ -2,10 +2,10 @@
 
 ## Situação atual
 
-- **Marco:** M0 — Fundação
+- **Marco:** M1 — Coletor local (M0 concluído em 2026-10-29, PR #7)
 - **Início do projeto:** 2026-10-12 (decisão da fase 07)
 - **Estudo:** 2026-10-12 a 2026-12-13 (rastreador; endereço em `CLAUDE.local.md`)
-- **Última leitura do rastreador:** 2026-10-18 — tópico 1 **dominado** (liberado em 2026-10-17); tópico 2 "estudando"; tópicos 3 a 13 "não iniciado".
+- **Última leitura do rastreador:** 2026-10-29 — tópicos 1 a 4 **dominados** (liberados em 17/10, 18/10, 22/10 e 24/10); tópicos 5 a 13 "não iniciado".
 
 ## M0 — checklist do "pronto"
 
@@ -23,17 +23,17 @@
 - [x] V-07 — Manual de Escopo de Dados 8.0 (2026-10-18: vigente a partir de 3/11/2026; define os dados obrigatórios, não as instituições; 1 `[VALIDAR]`)
 - [x] V-08 — termos do GitHub Actions (herdada; reconferir antes do M7)
 - [x] ADR-001 escrito pela pessoa desenvolvedora (mentoria pela skill `adr`) e aceito
-- [ ] Revisão de todos os arquivos do M0 pela pessoa desenvolvedora
+- [x] Revisão de todos os arquivos do M0 pela pessoa desenvolvedora (2026-10-29)
 - [x] `git init` e primeiro commit, sem segredos, feitos pela pessoa desenvolvedora (`52976fa`, 2026-10-10)
 
 ## Dependências de estudo por marco
 
-| Marco | Tópicos | Situação em 2026-10-18 |
+| Marco | Tópicos | Situação em 2026-10-29 |
 |---|---|---|
-| M0 | — | liberado |
-| M1 | 1, 2, 3 | bloqueado (1 dominado; 2 estudando; 3 não iniciado) |
+| M0 | — | concluído |
+| M1 | 1, 2, 3 | liberado (1, 2 e 3 dominados) |
 | M2 | 6 | bloqueado |
-| M3 | 4, 5 | bloqueado |
+| M3 | 4, 5 | bloqueado (4 dominado; 5 não iniciado) |
 | M4 | 7 | bloqueado (e condicionado à V-01) |
 | M5 | 8, 9 | bloqueado |
 | M6 | 10 | bloqueado |
@@ -63,6 +63,8 @@ Saídas da V-03 e da V-06, para não se perderem até o M1 (decisão final no AD
 Entradas curtas, mais recente no topo: data · o que foi feito · o que ficou · próximo passo · tópicos usados.
 
 ### 2026-10-29
+- **Feito (fim do dia):** revisão do M0 concluída pela pessoa desenvolvedora (hashes, trechos e links conferidos); errata do ADR-001 (5.3 → 5.3.2, V); PR #7 mergeado. **M0 concluído.** Rastreador relido: tópicos 1 a 4 dominados, M1 liberado. README com status M1.
+- **Próximo passo:** M1 — ADR de frequência (entradas acima) e escolha do modo de código do coletor.
 - **Feito:** ADR-001 aceito (PR #6): medir do Brasil, com a origem registrada em cada medição; caminho A → B pelo Parquet diário; GitHub Actions nunca coleta. Pendências da V-01 e da V-02 (origem 2) viraram gatilhos de revisão. Conferência do "pronto" do M0. `.gitattributes` com `*.jsonl text eol=lf`: com `core.autocrlf=true`, a cópia local das evidências da V-02 ganhava CRLF e o SHA-256 deixava de bater com o registrado (o conteúdo no git estava certo).
 - **Ficou:** revisão de todos os arquivos do M0 pela pessoa desenvolvedora; reler o rastreador antes de declarar o M1; `[VALIDAR]` da V-03, da V-07, da V-04 (M9) e do `VERSOES.md` (M6).
 - **Próximo passo:** revisão final do M0; depois, marco M1 e status do README.
