@@ -52,7 +52,7 @@ Regras:
 
 ## 5. Ética da coleta
 
-- Frequência modesta: **1 requisição a cada 15 minutos por endpoint** (valor inicial, ~154 endpoints × 96 ≈ 1,5 × 10⁴ medições por dia). O valor final fica num ADR do M1, depois da V-03.
+- Frequência modesta: **1 requisição a cada 15 minutos por endpoint** (valor fixado no ADR-002, ~154 endpoints × 96 ≈ 1,5 × 10⁴ medições por dia): ciclos em grade fixa, em sequência, sem retentativa nem sobreposição; Diretório 1 vez por dia.
 - Nunca teste de carga, rajada ou paralelismo agressivo. Nunca tentar provocar HTTP 429 ou 529.
 - Respeitar os limites por origem (IN 615, 5.1.1) e os termos de uso do Portal e do Diretório (V-03).
 - Identificar o projeto no `User-Agent`, com link para o repositório.
