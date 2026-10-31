@@ -154,5 +154,56 @@ class TestDecodificarChunked(unittest.TestCase):
                     coletor.decodificar_chunked(corpo_cru)
 
 
+class TestExtrairCorpo(unittest.TestCase):
+
+    def test_caminhos_de_sucesso(self):
+        # 1. Chunked (ignora Content-Length se presente)
+        corpo_chunked = b"4\r\nWiki\r\n0\r\n\r\n"
+        self.assertEqual(coletor.extrair_corpo({"transfer-encoding": "chunked"}, corpo_chunked), b"Wiki")
+
+        # 2. Content-Length exato
+        self.assertEqual(coletor.extrair_corpo({"content-length": "4"}, b"Wiki"), b"Wiki")
+
+        # 3. Nenhum dos dois (retorna cru)
+        self.assertEqual(coletor.extrair_corpo({}, b"Wiki"), b"Wiki")
+
+    def test_chunked_vence_content_length(self):
+        # A RFC diz que se ambos vierem, Transfer-Encoding anula o Content-Length
+        cabecalhos = {"transfer-encoding": "chunked", "content-length": "999"} # 999 está totalmente errado
+        corpo_chunked = b"4\r\nWiki\r\n0\r\n\r\n"
+        self.assertEqual(coletor.extrair_corpo(cabecalhos, corpo_chunked), b"Wiki")
+
+    def test_transfer_encoding_multiplo_e_maiusculas(self):
+        corpo_chunked = b"4\r\nWiki\r\n0\r\n\r\n"
+
+        # Maiúsculas com espaços extras (normalizados pelo .lower e .strip)
+        self.assertEqual(coletor.extrair_corpo({"transfer-encoding": " CHUNKED "}, corpo_chunked), b"Wiki")
+
+        # 'gzip, chunked': o envelope de fora (último) é chunked, então decodifica
+        self.assertEqual(coletor.extrair_corpo({"transfer-encoding": "gzip, chunked"}, corpo_chunked), b"Wiki")
+
+        # 'chunked, gzip': o envelope de fora é gzip. Não entra no if do chunked e retorna o corpo cru.
+        self.assertEqual(coletor.extrair_corpo({"transfer-encoding": "chunked, gzip"}, b"binario_gzip_falso"), b"binario_gzip_falso")
+
+    def test_excecoes_content_length(self):
+        casos = [
+            ({"content-length": "abc"}, b"123", "Content-Length inválido"),
+            ({"content-length": "5"}, b"1234", "Content-Length declara"), # Corpo menor que o declarado
+            ({"content-length": "3"}, b"1234", "Content-Length declara")  # Corpo maior que o declarado
+        ]
+        for cabecalhos, corpo, msg_esperada in casos:
+            with self.subTest(cabecalhos=cabecalhos):
+                with self.assertRaisesRegex(coletor.CorpoInvalido, msg_esperada):
+                    coletor.extrair_corpo(cabecalhos, corpo)
+
+    def test_rejeita_content_length_fora_da_rfc(self):
+        # "-1" não é 1*DIGIT. "¹²³" chegam pela rede (bytes 0xB9, 0xB2, 0xB3 em latin-1)
+        # e têm isdigit() == True, mas o int() não os aceita.
+        for declarado in ("-1", "¹", "²", "³"):
+            with self.subTest(declarado=declarado):
+                with self.assertRaisesRegex(coletor.CorpoInvalido, "Content-Length inválido"):
+                    coletor.extrair_corpo({"content-length": declarado}, b"")
+
+
 if __name__ == "__main__":
     unittest.main()
