@@ -25,7 +25,7 @@ from zoneinfo import ZoneInfo
 import certifi
 
 ESQUEMA_VERSAO = 1
-COLETOR_VERSAO = "0.1.0"
+COLETOR_VERSAO = "0.1.1"
 PRAZO_S = 15  # prazo total de relógio, do DNS ao último byte (ADR-003, decisão 1)
 USER_AGENT = (
     "monitor-open-finance/0.1 "
@@ -224,7 +224,20 @@ def medir_requisicao(url, ctx, prazo_s=PRAZO_S):
 
 
 def separar_resposta(bytes_crus):
-    """Devolve (status, cabeçalhos com nome em minúsculas, corpo ainda cru)."""
+    """Devolve (status, cabeçalhos com nome em minúsculas, corpo ainda cru) da resposta final."""
+    status, cabecalhos, corpo = separar_bloco(bytes_crus)
+    # 1xx antes da resposta final são intermediários (ex.: 103 Early Hints) e o cliente
+    # os descarta mesmo sem ter pedido (RFC 9110, 15.2). O 101 troca de protocolo:
+    # o que vem depois não é HTTP/1.1, então ele fica como está e vira malformado.
+    while 100 <= status < 200 and status != 101:
+        if not corpo:
+            raise RespostaMalformada(f"só resposta {status}, sem resposta final")
+        status, cabecalhos, corpo = separar_bloco(corpo)
+    return status, cabecalhos, corpo
+
+
+def separar_bloco(bytes_crus):
+    """Lê uma linha de status e seus cabeçalhos. O que sobra pode ser corpo ou outra resposta."""
     fim = bytes_crus.find(b"\r\n\r\n")
     if fim == -1:
         raise RespostaMalformada("separador de cabeçalho ausente")
