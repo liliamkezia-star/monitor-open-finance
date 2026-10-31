@@ -5,7 +5,8 @@
 - **Marco:** M1 — Coletor local (M0 concluído em 2026-10-29, PR #7)
 - **Início do projeto:** 2026-10-12 (decisão da fase 07)
 - **Estudo:** 2026-10-12 a 2026-12-13 (rastreador; endereço em `CLAUDE.local.md`)
-- **Última leitura do rastreador:** 2026-10-29 — tópicos 1 a 4 **dominados** (liberados em 17/10, 18/10, 22/10 e 24/10); tópicos 5 a 13 "não iniciado".
+- **Última leitura do rastreador:** 2026-10-31 — tópicos 1 a 4 **dominados** (liberados em 17/10, 18/10, 22/10 e 24/10); tópicos 5 a 13 "não iniciado".
+- **M1 até agora:** ADR-002 (frequência) e ADR-003 (timeout) aceitos; dicionário de dados v0; coletor v1 de um endpoint (0.1.1); 42 testes sem rede. Próximo: semana A2 do cronograma (Diretório no A2.1; ADR dos indicadores no A2.3).
 
 ## M0 — checklist do "pronto"
 
@@ -28,7 +29,7 @@
 
 ## Dependências de estudo por marco
 
-| Marco | Tópicos | Situação em 2026-10-29 |
+| Marco | Tópicos | Situação em 2026-10-31 |
 |---|---|---|
 | M0 | — | concluído |
 | M1 | 1, 2, 3 | liberado (1, 2 e 3 dominados) |
@@ -44,6 +45,8 @@
 ## Entradas para o ADR de frequência do M1
 
 Saídas da V-03 e da V-06, para não se perderem até o M1 (decisão final no ADR):
+
+**Atendidas em 2026-10-29** pelo ADR-002 (frequência, PR #9) e pelo ADR-003 (timeout, PR #10). O p95 de referência continua valendo para o M5. Lista mantida como histórico.
 
 - **APIs das instituições:** 1 requisição a cada 15 min por endpoint, mantida. A margem é de mais de 7.500 vezes sobre qualquer limite publicado (V-03, pergunta 2).
 - **Diretório:** consultar 1 vez por dia, de preferência com requisição condicional pelo `ETag`, e manter a última lista válida se ele falhar. O guia do Diretório recomenda "revalidação diária" (V-03, Diretório).
@@ -62,7 +65,20 @@ Saídas da V-03 e da V-06, para não se perderem até o M1 (decisão final no AD
 
 Entradas curtas, mais recente no topo: data · o que foi feito · o que ficou · próximo passo · tópicos usados.
 
+### 2026-10-31
+- **Feito:** A1.5 — testes sem rede do coletor (`tests/test_coletor.py`, `unittest`, 42 testes), escritos pela pessoa desenvolvedora com mentoria; parte das correções nos testes e as correções no coletor foram escritas pelo Claude e revisadas por ela. Os testes acharam **4 bugs**, corrigidos com um teste que falhava antes: tamanho de pedaço `chunked` fora de `1*HEXDIG`; `Content-Length` com `¹²³` derrubava o coletor (`ValueError` sem tratamento); `e_json` aceitava `NaN`/`Infinity` e caía com aninhamento fundo (`RecursionError`); 1xx intermediário (ex.: `103 Early Hints`) fazia um 200 virar `falha_conexao` (achado no pente fino). Coletor 0.1.1. Dicionário: risco do ponto 4 (URLs do Diretório) e pontos 11 a 13. Rastreador relido.
+- **Ficou:** pontos 12 (JSON fora de UTF-8) e 13 (2xx sem corpo) do dicionário, para o A2.3; `coletor_versao` não marca quando o código rodado tem mudanças sem commit.
+- **Próximo passo:** PR do A1.5; depois, semana A2 do cronograma.
+- **Tópicos usados:** 3 (testes; feitos com `unittest`, escolha da pessoa desenvolvedora); 1 (os pontos fracos ".get com padrão esconde erro" e "expectativa errada no teste" apareceram de novo e foram corrigidos na revisão).
+
+### 2026-10-30
+- **Feito:** A1.4 — coletor v1 (`coletor/coletor.py`, PR #12): um endpoint fixo (CREFISA, `personal-loans`), `socket` + `ssl` com fases DNS/TCP/TLS/primeiro byte/download, prazo total de 15 s (ADR-003), raiz ICP-Brasil conferida por SHA-256, um JSONL por dia UTC com 29 campos. Escrito pela pessoa desenvolvedora com mentoria; no pente fino pedido por ela, o Claude revisou e reescreveu partes, e ela revisou. `tzdata` no `requirements.txt` (ponto 6). Dicionário: pontos 8 a 10. Conferido rodando: 1 medição com sucesso e timeout forçado com `--prazo 0.05`.
+- **Ficou:** testes sem rede (A1.5).
+- **Próximo passo:** A1.5.
+- **Tópicos usados:** 1 (registro no mesmo formato para sucesso e falha) e 2 (medição por fases com `socket`/`ssl`/`perf_counter`).
+
 ### 2026-10-29
+- **Feito (tarde):** M1 aberto (PR #8). ADR-002 aceito (PR #9): 15 min por endpoint em grade fixa UTC, chamadas em sequência com pausa de 1 s, sem sobreposição nem retentativa, 429 registrado, Diretório 1 vez por dia com `ETag`. ADR-003 aceito (PR #10): prazo total de 15 s de relógio com a fase registrada; 504 não é timeout; Diretório com 60 s. Dicionário de dados v0 (PR #11), com os pontos 1, 6 e 7 aceitos.
 - **Feito (fim do dia):** revisão do M0 concluída pela pessoa desenvolvedora (hashes, trechos e links conferidos); errata do ADR-001 (5.3 → 5.3.2, V); PR #7 mergeado. **M0 concluído.** Rastreador relido: tópicos 1 a 4 dominados, M1 liberado. README com status M1.
 - **Próximo passo:** M1 — ADR de frequência (entradas acima) e escolha do modo de código do coletor.
 - **Feito:** ADR-001 aceito (PR #6): medir do Brasil, com a origem registrada em cada medição; caminho A → B pelo Parquet diário; GitHub Actions nunca coleta. Pendências da V-01 e da V-02 (origem 2) viraram gatilhos de revisão. Conferência do "pronto" do M0. `.gitattributes` com `*.jsonl text eol=lf`: com `core.autocrlf=true`, a cópia local das evidências da V-02 ganhava CRLF e o SHA-256 deixava de bater com o registrado (o conteúdo no git estava certo).
