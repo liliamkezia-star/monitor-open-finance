@@ -303,11 +303,18 @@ def categoria_do_status(status):
     raise RespostaMalformada(f"resposta final com status {status}")
 
 
+def rejeitar_constante(nome):
+    # json.loads aceita NaN, Infinity e -Infinity, que a RFC 8259 (seção 6) não aceita
+    raise ValueError(f"constante fora do JSON: {nome}")
+
+
 def e_json(corpo):
     try:
-        json.loads(corpo)
-    # JSONDecodeError e UnicodeDecodeError são subclasses de ValueError
-    except ValueError:
+        json.loads(corpo, parse_constant=rejeitar_constante)
+    # JSONDecodeError e UnicodeDecodeError são subclasses de ValueError.
+    # RecursionError vem de aninhamento fundo demais: a RFC 8259 (seção 9) deixa o
+    # parser limitar a profundidade, e a medição vira corpo_invalido em vez de derrubar o coletor
+    except (ValueError, RecursionError):
         return False
     return True
 
