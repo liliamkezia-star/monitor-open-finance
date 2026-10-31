@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timezone
 from coletor import coletor
 
 
@@ -235,6 +236,63 @@ class TestEJson(unittest.TestCase):
         # O limite real depende da versão do Python (2000 níveis passam no 3.12), daí a folga grande.
         corpo_profundo = b'[' * 100_000 + b']' * 100_000
         self.assertFalse(coletor.e_json(corpo_profundo))
+
+
+class TestTempo(unittest.TestCase):
+
+    def test_ciclo_de_bordas(self):
+        casos = [
+            # Início exato do bloco
+            (datetime(2026, 10, 31, 12, 0, 0, 0, tzinfo=timezone.utc),
+             datetime(2026, 10, 31, 12, 0, 0, 0, tzinfo=timezone.utc)),
+
+            # Fim extremo do primeiro bloco (não avança a hora)
+            (datetime(2026, 10, 31, 12, 14, 59, 999999, tzinfo=timezone.utc),
+             datetime(2026, 10, 31, 12, 0, 0, 0, tzinfo=timezone.utc)),
+
+            # Início exato do segundo bloco
+            (datetime(2026, 10, 31, 12, 15, 0, 0, tzinfo=timezone.utc),
+             datetime(2026, 10, 31, 12, 15, 0, 0, tzinfo=timezone.utc)),
+
+            # Último bloco da hora
+            (datetime(2026, 10, 31, 12, 45, 0, 0, tzinfo=timezone.utc),
+             datetime(2026, 10, 31, 12, 45, 0, 0, tzinfo=timezone.utc)),
+
+            # Fim extremo do último bloco da hora
+            (datetime(2026, 10, 31, 12, 59, 59, 999999, tzinfo=timezone.utc),
+             datetime(2026, 10, 31, 12, 45, 0, 0, tzinfo=timezone.utc))
+        ]
+
+        for instante, inicio_esperado in casos:
+            with self.subTest(instante=instante):
+                self.assertEqual(coletor.ciclo_de(instante), inicio_esperado)
+
+    def test_ciclo_de_virada_de_dia(self):
+        # Garante que os últimos microssegundos do ano ficam no último bloco do ano,
+        # sem alterar dia, mês ou ano acidentalmente.
+        instante = datetime(2026, 12, 31, 23, 59, 59, 999999, tzinfo=timezone.utc)
+        esperado = datetime(2026, 12, 31, 23, 45, 0, 0, tzinfo=timezone.utc)
+
+        self.assertEqual(coletor.ciclo_de(instante), esperado)
+
+    def test_formatar_utc_truncamento(self):
+        # 999999 microssegundos. Se isoformat() arredondasse para cima, isso viraria 12:15:00.
+        # Mas em Python, isoformat trunca.
+        instante = datetime(2026, 10, 31, 12, 14, 59, 999999, tzinfo=timezone.utc)
+
+        # Teste timespec = milliseconds (Padrão)
+        str_ms = coletor.formatar_utc(instante)
+        self.assertEqual(str_ms, "2026-10-31T12:14:59.999Z")
+
+        # Teste timespec = seconds
+        str_sec = coletor.formatar_utc(instante, timespec="seconds")
+        self.assertEqual(str_sec, "2026-10-31T12:14:59Z")
+
+    def test_ciclo_utc_composto(self):
+        # Como o registro monta o ciclo_utc; comparar texto confere também o "Z"
+        instante = datetime(2026, 10, 31, 12, 14, 59, 999999, tzinfo=timezone.utc)
+        self.assertEqual(coletor.formatar_utc(coletor.ciclo_de(instante), timespec="seconds"),
+                         "2026-10-31T12:00:00Z")
 
 
 if __name__ == "__main__":
