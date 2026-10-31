@@ -205,5 +205,37 @@ class TestExtrairCorpo(unittest.TestCase):
                     coletor.extrair_corpo({"content-length": declarado}, b"")
 
 
+class TestEJson(unittest.TestCase):
+
+    def test_basico_e_vazio(self):
+        # Casos óbvios
+        self.assertTrue(coletor.e_json(b'{"status": "ativo"}'))
+        self.assertFalse(coletor.e_json(b'texto plano sem formato'))
+        self.assertFalse(coletor.e_json(b''))  # Vazio lança JSONDecodeError
+
+    def test_codificacao_invalida(self):
+        # \x80 não é UTF-8 válido. Lança UnicodeDecodeError.
+        # Como UnicodeDecodeError herda de ValueError, o except segura a exceção.
+        self.assertFalse(coletor.e_json(b'\x80'))
+
+    def test_tipos_primitivos(self):
+        # Primitivos soltos são JSON válido (RFC 8259); se servem ao endpoint é conformidade (A2.3)
+        self.assertTrue(coletor.e_json(b'null'))
+        self.assertTrue(coletor.e_json(b'1'))
+        self.assertTrue(coletor.e_json(b'"texto"'))
+
+    def test_rejeita_constantes_fora_da_rfc(self):
+        # O json.loads do Python aceita NaN e Infinity por padrão, mas a RFC 8259 não
+        for corpo in (b'NaN', b'Infinity', b'-Infinity', b'[1, NaN]'):
+            with self.subTest(corpo=corpo):
+                self.assertFalse(coletor.e_json(corpo))
+
+    def test_aninhamento_profundo_nao_derruba(self):
+        # Um JSON maliciosamente ou acidentalmente aninhado lança RecursionError, que não é ValueError.
+        # O limite real depende da versão do Python (2000 níveis passam no 3.12), daí a folga grande.
+        corpo_profundo = b'[' * 100_000 + b']' * 100_000
+        self.assertFalse(coletor.e_json(corpo_profundo))
+
+
 if __name__ == "__main__":
     unittest.main()
