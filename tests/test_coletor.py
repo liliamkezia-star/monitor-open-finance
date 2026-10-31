@@ -75,14 +75,15 @@ class TestSepararResposta(unittest.TestCase):
                     coletor.separar_resposta(bytes_crus)
 
     def test_status_nas_bordas_da_faixa(self):
-        # Garante que as bordas da faixa de sucesso/validade são aceitas
+        # Garante que as bordas da faixa de sucesso/validade são aceitas.
+        # separar_bloco, porque um 100 sozinho em separar_resposta é "1xx sem resposta final"
         casos = [
             (b"HTTP/1.1 100 Continue\r\n\r\n", 100),
             (b"HTTP/1.1 599 Unknown Error\r\n\r\n", 599)
         ]
         for bytes_crus, status_esperado in casos:
             with self.subTest(status_esperado=status_esperado):
-                status, _, _ = coletor.separar_resposta(bytes_crus)
+                status, _, _ = coletor.separar_bloco(bytes_crus)
                 self.assertEqual(status, status_esperado)
 
     def test_bordas_cabecalhos_e_corpo(self):
@@ -102,6 +103,38 @@ class TestSepararResposta(unittest.TestCase):
             "date": "Thu, 01 Jan 2026 12:00:00 GMT"
         })
         self.assertEqual(corpo, b"Corpo falso com \r\n\r\n no meio")
+
+    def test_pula_respostas_1xx_intermediarias(self):
+        # RFC 9110, 15.2: o cliente descarta 1xx antes da resposta final, mesmo sem ter pedido
+        casos = [
+            b"HTTP/1.1 103 Early Hints\r\nLink: </a>\r\n\r\n",
+            b"HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 102 Processing\r\n\r\n",
+        ]
+        final = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{}"
+        for intermediarias in casos:
+            with self.subTest(intermediarias=intermediarias):
+                status, cabecalhos, corpo = coletor.separar_resposta(intermediarias + final)
+                self.assertEqual(status, 200)
+                self.assertEqual(cabecalhos, {"content-type": "application/json"})
+                self.assertEqual(corpo, b"{}")
+
+    def test_1xx_sem_resposta_final(self):
+        casos = [
+            # Só o 1xx: a resposta final não chegou (ponto 10 do dicionário)
+            (b"HTTP/1.1 103 Early Hints\r\n\r\n", "sem resposta final"),
+            # Depois do 1xx vem lixo: cai na validação da resposta seguinte
+            (b"HTTP/1.1 103 Early Hints\r\n\r\nlixo", "separador de cabeçalho ausente"),
+        ]
+        for bytes_crus, msg_esperada in casos:
+            with self.subTest(bytes_crus=bytes_crus):
+                with self.assertRaisesRegex(coletor.RespostaMalformada, msg_esperada):
+                    coletor.separar_resposta(bytes_crus)
+
+    def test_101_nao_e_pulado(self):
+        # 101 troca de protocolo: o que vem depois não é HTTP/1.1, então não se lê adiante.
+        # O coletor nunca pede Upgrade; montar_registro trata o 101 como malformado.
+        status, _, _ = coletor.separar_resposta(b"HTTP/1.1 101 Switching Protocols\r\n\r\n\x81\x00")
+        self.assertEqual(status, 101)
 
 
 class TestDecodificarChunked(unittest.TestCase):
@@ -417,6 +450,17 @@ class TestMontarRegistro(unittest.TestCase):
 
         # JSON perfeitamente válido não salva um status de erro
         self.assertEqual(registro["categoria"], "4xx")
+
+    def test_8_103_antes_do_200(self):
+        # Antes, o 103 era lido como resposta final e um 200 de verdade virava falha_conexao
+        rede = self.rede_ok()
+        resposta = (b"HTTP/1.1 103 Early Hints\r\nLink: </a>\r\n\r\n"
+                    b"HTTP/1.1 200 OK\r\n\r\n{}")
+        registro = coletor.montar_registro(self.alvo, 1, resposta, rede, self.versao)
+
+        self.assertEqual(registro["categoria"], "sucesso")
+        self.assertEqual(registro["status"], 200)
+        self.assertEqual(registro["corpo_bytes"], 2)
 
     def test_formato_e_timestamps(self):
         # 1. Conservação estrutural
