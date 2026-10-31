@@ -25,7 +25,7 @@ from zoneinfo import ZoneInfo
 import certifi
 
 ESQUEMA_VERSAO = 1
-COLETOR_VERSAO = "0.1.0"
+COLETOR_VERSAO = "0.1.1"
 PRAZO_S = 15  # prazo total de relógio, do DNS ao último byte (ADR-003, decisão 1)
 USER_AGENT = (
     "monitor-open-finance/0.1 "
@@ -224,7 +224,20 @@ def medir_requisicao(url, ctx, prazo_s=PRAZO_S):
 
 
 def separar_resposta(bytes_crus):
-    """Devolve (status, cabeçalhos com nome em minúsculas, corpo ainda cru)."""
+    """Devolve (status, cabeçalhos com nome em minúsculas, corpo ainda cru) da resposta final."""
+    status, cabecalhos, corpo = separar_bloco(bytes_crus)
+    # 1xx antes da resposta final são intermediários (ex.: 103 Early Hints) e o cliente
+    # os descarta mesmo sem ter pedido (RFC 9110, 15.2). O 101 troca de protocolo:
+    # o que vem depois não é HTTP/1.1, então ele fica como está e vira malformado.
+    while 100 <= status < 200 and status != 101:
+        if not corpo:
+            raise RespostaMalformada(f"só resposta {status}, sem resposta final")
+        status, cabecalhos, corpo = separar_bloco(corpo)
+    return status, cabecalhos, corpo
+
+
+def separar_bloco(bytes_crus):
+    """Lê uma linha de status e seus cabeçalhos. O que sobra pode ser corpo ou outra resposta."""
     fim = bytes_crus.find(b"\r\n\r\n")
     if fim == -1:
         raise RespostaMalformada("separador de cabeçalho ausente")
@@ -259,10 +272,10 @@ def decodificar_chunked(corpo):
             raise CorpoInvalido("chunked sem o pedaço final de tamanho 0")
         # extensões depois de ';' são ignoradas (RFC 9112, 7.1.1)
         tamanho_hex = corpo[posicao:fim_linha].split(b";")[0].strip()
-        try:
-            tamanho = int(tamanho_hex, 16)
-        except ValueError:
-            raise CorpoInvalido(f"tamanho de pedaço inválido: {tamanho_hex[:20]!r}") from None
+        # só HEXDIG (RFC 9112, 7.1): int(x, 16) sozinho aceitaria "+a", "0xa", "1_0"
+        if not re.fullmatch(rb"[0-9a-fA-F]+", tamanho_hex):
+            raise CorpoInvalido(f"tamanho de pedaço inválido: {tamanho_hex[:20]!r}")
+        tamanho = int(tamanho_hex, 16)
         if tamanho == 0:
             return bytes(saida)
         inicio = fim_linha + 2
@@ -281,7 +294,8 @@ def extrair_corpo(cabecalhos, corpo_cru):
         return decodificar_chunked(corpo_cru)
     declarado = cabecalhos.get("content-length")
     if declarado is not None:
-        if not declarado.isdigit():
+        # só DIGIT ASCII (RFC 9110, 8.6): isdigit() aceita "²", que o int() rejeita
+        if not re.fullmatch(r"[0-9]+", declarado):
             raise CorpoInvalido(f"Content-Length inválido: {declarado[:20]!r}")
         if len(corpo_cru) != int(declarado):
             raise CorpoInvalido(
@@ -302,11 +316,18 @@ def categoria_do_status(status):
     raise RespostaMalformada(f"resposta final com status {status}")
 
 
+def rejeitar_constante(nome):
+    # json.loads aceita NaN, Infinity e -Infinity, que a RFC 8259 (seção 6) não aceita
+    raise ValueError(f"constante fora do JSON: {nome}")
+
+
 def e_json(corpo):
     try:
-        json.loads(corpo)
-    # JSONDecodeError e UnicodeDecodeError são subclasses de ValueError
-    except ValueError:
+        json.loads(corpo, parse_constant=rejeitar_constante)
+    # JSONDecodeError e UnicodeDecodeError são subclasses de ValueError.
+    # RecursionError vem de aninhamento fundo demais: a RFC 8259 (seção 9) deixa o
+    # parser limitar a profundidade, e a medição vira corpo_invalido em vez de derrubar o coletor
+    except (ValueError, RecursionError):
         return False
     return True
 
