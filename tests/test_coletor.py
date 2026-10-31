@@ -1,3 +1,4 @@
+import hashlib
 import unittest
 from datetime import datetime, timezone
 from coletor import coletor
@@ -316,6 +317,124 @@ class TestVersaoMajorDe(unittest.TestCase):
             with self.subTest(url=url):
                 with self.assertRaisesRegex(ValueError, "URL sem /vN/ no caminho"):
                     coletor.versao_major_de(url)
+
+
+class TestMontarRegistro(unittest.TestCase):
+    # Campos lidos com registro["campo"], nunca .get(): nome errado tem que quebrar o teste
+
+    def setUp(self):
+        self.alvo = coletor.ALVO
+        self.versao = "0.1.0+teste"
+
+    def rede_ok(self, **mudancas):
+        base = {
+            "inicio_utc": datetime(2026, 10, 31, 12, 14, 59, 999000, tzinfo=timezone.utc),
+            "categoria": None, "fase_falha": None, "erro_tipo": None, "erro_detalhe": None,
+            "tempo_total_ms": 812.5, "tempo_decorrido_ms": 812.9,
+            "tempo_dns_ms": 10.0, "tempo_tcp_ms": 20.0, "tempo_tls_ms": 30.0,
+            "tempo_primeiro_byte_ms": 700.0, "tempo_download_ms": 52.5,
+        }
+        base.update(mudancas)
+        return base
+
+    def assert_sem_resposta(self, registro):
+        for campo in ("status", "corpo_bytes", "corpo_sha256", "content_type"):
+            with self.subTest(campo=campo):
+                self.assertIsNone(registro[campo])
+
+    def test_1_falha_de_rede_timeout(self):
+        # Timeout na fase TCP: sem tempo total (ADR-003, decisão 3) e sem as fases seguintes
+        rede = self.rede_ok(categoria="timeout", fase_falha="tcp", erro_tipo="TimeoutError",
+                            tempo_total_ms=None, tempo_tcp_ms=None, tempo_tls_ms=None,
+                            tempo_primeiro_byte_ms=None, tempo_download_ms=None)
+        registro = coletor.montar_registro(self.alvo, 1, None, rede, self.versao)
+
+        # Passam intactos
+        self.assertEqual(registro["categoria"], "timeout")
+        self.assertEqual(registro["fase_falha"], "tcp")
+        self.assertEqual(registro["erro_tipo"], "TimeoutError")
+        self.assertIsNone(registro["tempo_total_ms"])
+        self.assertEqual(registro["tempo_dns_ms"], 10.0)
+        # Nunca chegaram a existir
+        self.assert_sem_resposta(registro)
+
+    def test_2_bytes_nao_formam_http(self):
+        rede = self.rede_ok()
+        registro = coletor.montar_registro(self.alvo, 1, b"Lixo puro ou conexao cortada cedo demais", rede, self.versao)
+
+        self.assertEqual(registro["categoria"], "falha_conexao")
+        self.assertEqual(registro["fase_falha"], "download")
+        self.assertEqual(registro["erro_tipo"], "RespostaMalformada")
+        self.assertIsNone(registro["tempo_total_ms"]) # Se não formou HTTP, o tempo total é desconsiderado
+        self.assert_sem_resposta(registro)
+
+    def test_3_2xx_content_length_errado(self):
+        rede = self.rede_ok()
+        resposta = b"HTTP/1.1 200 OK\r\nContent-Length: 99\r\n\r\n{}"
+        registro = coletor.montar_registro(self.alvo, 1, resposta, rede, self.versao)
+
+        self.assertEqual(registro["categoria"], "corpo_invalido")
+        self.assertEqual(registro["status"], 200) # O status foi lido perfeitamente
+        self.assertEqual(registro["erro_tipo"], "CorpoInvalido")
+        self.assertIsNone(registro["corpo_bytes"])  # Corpo inválido não tem tamanho nem hash
+        self.assertIsNone(registro["corpo_sha256"])
+
+    def test_4_404_com_corpo_quebrado(self):
+        rede = self.rede_ok()
+        # Mesmo com Content-Length mentiroso/quebrado, o status do servidor tem prioridade
+        resposta = b"HTTP/1.1 404 Not Found\r\nContent-Length: 99\r\n\r\nlixo_truncado"
+        registro = coletor.montar_registro(self.alvo, 1, resposta, rede, self.versao)
+
+        self.assertEqual(registro["categoria"], "4xx")
+        self.assertEqual(registro["status"], 404)
+
+    def test_5_200_com_json_valido(self):
+        rede = self.rede_ok()
+        corpo = b'{"status": "ativo"}'
+        resposta = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n" + corpo
+        registro = coletor.montar_registro(self.alvo, 1, resposta, rede, self.versao)
+
+        self.assertEqual(registro["categoria"], "sucesso")
+        self.assertEqual(registro["status"], 200)
+        self.assertEqual(registro["content_type"], "application/json")
+        self.assertEqual(registro["corpo_bytes"], len(corpo))
+        self.assertEqual(registro["corpo_sha256"], hashlib.sha256(corpo).hexdigest())
+        self.assertEqual(registro["tempo_total_ms"], 812.5)
+
+    def test_6_200_sem_json(self):
+        rede = self.rede_ok()
+        resposta = b"HTTP/1.1 200 OK\r\n\r\n<html>Resposta de Proxy Mentirosa</html>"
+        registro = coletor.montar_registro(self.alvo, 1, resposta, rede, self.versao)
+
+        # Este é o teste pendente! Protege o comportamento de que 2xx exige JSON válido.
+        self.assertEqual(registro["categoria"], "corpo_invalido")
+
+    def test_7_404_com_json_valido(self):
+        rede = self.rede_ok()
+        corpo = b'{"erro": "Recurso nao encontrado"}'
+        resposta = b"HTTP/1.1 404 Not Found\r\n\r\n" + corpo
+        registro = coletor.montar_registro(self.alvo, 1, resposta, rede, self.versao)
+
+        # JSON perfeitamente válido não salva um status de erro
+        self.assertEqual(registro["categoria"], "4xx")
+
+    def test_formato_e_timestamps(self):
+        # 1. Conservação estrutural
+        rede_sucesso = self.rede_ok()
+        reg_sucesso = coletor.montar_registro(self.alvo, 1, b"HTTP/1.1 200 OK\r\n\r\n{}", rede_sucesso, self.versao)
+
+        rede_timeout = self.rede_ok(categoria="timeout", fase_falha="dns")
+        reg_timeout = coletor.montar_registro(self.alvo, 1, None, rede_timeout, self.versao)
+
+        # Independente do fluxo (rede cortada ou sucesso pleno), a estrutura de 29 chaves é imutável
+        self.assertEqual(len(reg_sucesso.keys()), 29)
+        self.assertListEqual(list(reg_sucesso.keys()), list(reg_timeout.keys()))
+
+        # 2. Assertivas de Timestamps
+        self.assertEqual(reg_sucesso["ciclo_utc"], "2026-10-31T12:00:00Z")
+        self.assertEqual(reg_sucesso["timestamp_utc"], "2026-10-31T12:14:59.999Z")
+        # Sem horário de verão, Brasília é estritamente UTC-3 (12 - 3 = 09)
+        self.assertEqual(reg_sucesso["timestamp_brasilia"], "2026-10-31T09:14:59.999-03:00")
 
 
 if __name__ == "__main__":
