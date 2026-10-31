@@ -259,10 +259,10 @@ def decodificar_chunked(corpo):
             raise CorpoInvalido("chunked sem o pedaço final de tamanho 0")
         # extensões depois de ';' são ignoradas (RFC 9112, 7.1.1)
         tamanho_hex = corpo[posicao:fim_linha].split(b";")[0].strip()
-        try:
-            tamanho = int(tamanho_hex, 16)
-        except ValueError:
-            raise CorpoInvalido(f"tamanho de pedaço inválido: {tamanho_hex[:20]!r}") from None
+        # só HEXDIG (RFC 9112, 7.1): int(x, 16) sozinho aceitaria "+a", "0xa", "1_0"
+        if not re.fullmatch(rb"[0-9a-fA-F]+", tamanho_hex):
+            raise CorpoInvalido(f"tamanho de pedaço inválido: {tamanho_hex[:20]!r}")
+        tamanho = int(tamanho_hex, 16)
         if tamanho == 0:
             return bytes(saida)
         inicio = fim_linha + 2
