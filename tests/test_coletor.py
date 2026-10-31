@@ -295,5 +295,28 @@ class TestTempo(unittest.TestCase):
                          "2026-10-31T12:00:00Z")
 
 
+class TestVersaoMajorDe(unittest.TestCase):
+
+    def test_caminho_feliz(self):
+        casos = [
+            ("https://api.crefisa.com.br/opendata-loans/v1/personal-loans", 1),
+            ("https://api.banco.com.br/open-banking/v12/recurso", 12),
+            ("https://api.banco.com.br/open-banking/v01/recurso", 1)  # O int("01") resolve o zero à esquerda
+        ]
+        for url, versao_esperada in casos:
+            with self.subTest(url=url):
+                self.assertEqual(coletor.versao_major_de(url), versao_esperada)
+
+    def test_excecoes(self):
+        casos = [
+            "https://api.banco.com.br/opendata-loans/personal-loans",  # Sem versão
+            "https://api.banco.com.br/opendata-loans/v1"               # Sem a barra no final (a regex exige /vN/)
+        ]
+        for url in casos:
+            with self.subTest(url=url):
+                with self.assertRaisesRegex(ValueError, "URL sem /vN/ no caminho"):
+                    coletor.versao_major_de(url)
+
+
 if __name__ == "__main__":
     unittest.main()
