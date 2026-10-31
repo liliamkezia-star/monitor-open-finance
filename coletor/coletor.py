@@ -281,7 +281,8 @@ def extrair_corpo(cabecalhos, corpo_cru):
         return decodificar_chunked(corpo_cru)
     declarado = cabecalhos.get("content-length")
     if declarado is not None:
-        if not declarado.isdigit():
+        # só DIGIT ASCII (RFC 9110, 8.6): isdigit() aceita "²", que o int() rejeita
+        if not re.fullmatch(r"[0-9]+", declarado):
             raise CorpoInvalido(f"Content-Length inválido: {declarado[:20]!r}")
         if len(corpo_cru) != int(declarado):
             raise CorpoInvalido(
