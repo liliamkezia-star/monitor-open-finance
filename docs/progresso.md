@@ -5,8 +5,8 @@
 - **Marco:** M1 — Coletor local (M0 concluído em 2026-10-29, PR #7)
 - **Início do projeto:** 2026-10-12 (decisão da fase 07)
 - **Estudo:** 2026-10-12 a 2026-12-13 (rastreador; endereço em `CLAUDE.local.md`)
-- **Última leitura do rastreador:** 2026-10-31 — tópicos 1 a 4 **dominados** (liberados em 17/10, 18/10, 22/10 e 24/10); tópicos 5 a 13 "não iniciado".
-- **M1 até agora:** ADR-002 (frequência) e ADR-003 (timeout) aceitos; dicionário de dados v0; coletor v1 de um endpoint (0.1.1); 42 testes sem rede. Próximo: semana A2 do cronograma (Diretório no A2.1; ADR dos indicadores no A2.3).
+- **Última leitura do rastreador:** 2026-11-02 — tópicos 1 a 4 **dominados** (liberados em 17/10, 18/10, 22/10 e 24/10); tópicos 5 a 13 "não iniciado".
+- **M1 até agora:** ADR-002 (frequência), ADR-003 (timeout), ADR-004 (consulta ao Diretório) e ADR-005 (lista que encolhe) aceitos; dicionário de dados v0; coletor v1 de um endpoint (0.1.1); comando `python -m coletor.diretorio`; 95 testes sem rede. Próximo: A2.2 (medir todas as instituições de 1 família a partir do cache); ADR-006 dos indicadores no A2.3.
 
 ## M0 — checklist do "pronto"
 
@@ -64,6 +64,13 @@ Saídas da V-03 e da V-06, para não se perderem até o M1 (decisão final no AD
 ## Diário
 
 Entradas curtas, mais recente no topo: data · o que foi feito · o que ficou · próximo passo · tópicos usados.
+
+### 2026-11-02
+- **Feito:** A2.1, adiantado em 1 dia — comando separado `python -m coletor.diretorio` (`coletor/diretorio.py`): até 3 tentativas com pausas de 5 s e 10 s, só em falha que pode passar sozinha; cache atômico com lista, `ETag` e `validada_em`; registro em `data/diretorio/consultas.jsonl`. ADR-004 e ADR-005 aceitos. Lista real: sem paginação, 105 organizações; em `personal-loans`, 54 entradas para 53 URLs, nenhuma compartilhada entre organizações, nenhum host só com IPv6 e 40 de 45 hosts com mais de um IPv4 (dicionário, pontos 5 e 8). 53 testes novos, 95 no total. O pente fino achou 2 bugs, corrigidos com um teste que falhava antes: JSON fundo derrubava o comando sem registro ao gravar; corpo fora de UTF-8 era aceito com o texto corrompido. 4 consultas reais ao Diretório para validar (o `304` real funcionou).
+- **Autoria:** a pessoa desenvolvedora fez o desenho nas respostas de cada passo, a primeira versão da tentativa e do laço, `TestMotivoListaInvalida` e as decisões. O Claude escreveu as versões corrigidas, o cache, o comando, as outras classes de testes, os ADRs e o pente fino.
+- **Ficou:** revisão pela pessoa desenvolvedora do cache, do comando e dos testes escritos pelo Claude; pontos menores do pente fino (`NaN`, `OrganisationId` só com espaços ou repetido, `304` com outro `ETag`, truncado com `status` nulo, redirecionamentos, tamanho do corpo, temporário órfão); Hipótese do `304` raro (ADR-004).
+- **Próximo passo:** PR do A2.1; depois, A2.2.
+- **Tópicos usados:** 1 (retentativa, `except` pelo nome, `.get` que esconde erro) e 3 (testes sem rede com injeção).
 
 ### 2026-10-31
 - **Feito:** A1.5 — testes sem rede do coletor (`tests/test_coletor.py`, `unittest`, 42 testes), escritos pela pessoa desenvolvedora com mentoria; parte das correções nos testes e as correções no coletor foram escritas pelo Claude e revisadas por ela. Os testes acharam **4 bugs**, corrigidos com um teste que falhava antes: tamanho de pedaço `chunked` fora de `1*HEXDIG`; `Content-Length` com `¹²³` derrubava o coletor (`ValueError` sem tratamento); `e_json` aceitava `NaN`/`Infinity` e caía com aninhamento fundo (`RecursionError`); 1xx intermediário (ex.: `103 Early Hints`) fazia um 200 virar `falha_conexao` (achado no pente fino). Coletor 0.1.1. Dicionário: risco do ponto 4 (URLs do Diretório) e pontos 11 a 13. Rastreador relido.
